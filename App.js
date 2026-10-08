@@ -51,7 +51,6 @@ export default function App() {
       >
         <Tab.Screen name="HOME" component={HomeScreen} />
         <Tab.Screen name="MAP" component={MapScreen} />
-        {/* Changed name to all uppercase for consistency */}
         <Tab.Screen name="REPORT" component={ReportScreen} />
         <Tab.Screen name="NOTIFICATION" component={NotificationScreen} />
         <Tab.Screen name="PROFILE" component={ProfileScreen} />

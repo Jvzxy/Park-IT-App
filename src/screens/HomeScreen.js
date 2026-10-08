@@ -2,7 +2,8 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-export default function HomeScreen() {
+// 1. Pass the navigation prop here
+export default function HomeScreen({ navigation }) {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
@@ -17,7 +18,12 @@ export default function HomeScreen() {
               <Text style={styles.headerSubtitle}>USTP-CDO PARKING SPACE</Text>
             </View>
           </View>
-          <TouchableOpacity style={styles.reportBtn}>
+          
+          {/* 2. Add the onPress navigation event here */}
+          <TouchableOpacity 
+            style={styles.reportBtn}
+            onPress={() => navigation.navigate('REPORT')}
+          >
             <Text style={styles.reportBtnText}>Report</Text>
           </TouchableOpacity>
         </View>
