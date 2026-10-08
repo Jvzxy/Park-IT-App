@@ -1,13 +1,14 @@
 import React from 'react';
 import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Ionicons } from '@expo/vector-icons'; // Assuming Expo usage
+import { Ionicons } from '@expo/vector-icons'; 
 
-// Import screens from your new src/screens/ folder
+// Fixed import path for ReportScreen
 import HomeScreen from './src/screens/HomeScreen';
-import MapScreen from './src/screens/MapScreen'; // Create placeholders for these
+import MapScreen from './src/screens/MapScreen'; 
 import NotificationScreen from './src/screens/NotificationScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
+import ReportScreen from './src/screens/ReportScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -32,20 +33,26 @@ export default function App() {
             paddingBottom: 10,
             paddingTop: 10,
           },
-          tabBarActiveTintColor: '#fbbf24', // Yellow color for active tab
+          tabBarActiveTintColor: '#fbbf24', 
           tabBarInactiveTintColor: '#f8fafc',
-          tabBarIcon: ({ focused, color, size }) => {
+          tabBarIcon: ({ focused, color }) => {
             let iconName;
+            
+            // Added logic for the REPORT tab
             if (route.name === 'HOME') iconName = focused ? 'home' : 'home-outline';
             else if (route.name === 'MAP') iconName = focused ? 'map' : 'map-outline';
+            else if (route.name === 'REPORT') iconName = focused ? 'alert-circle' : 'alert-circle-outline';
             else if (route.name === 'NOTIFICATION') iconName = focused ? 'notifications' : 'notifications-outline';
             else if (route.name === 'PROFILE') iconName = focused ? 'person' : 'person-outline';
+            
             return <Ionicons name={iconName} size={24} color={color} />;
           },
         })}
       >
         <Tab.Screen name="HOME" component={HomeScreen} />
         <Tab.Screen name="MAP" component={MapScreen} />
+        {/* Changed name to all uppercase for consistency */}
+        <Tab.Screen name="REPORT" component={ReportScreen} />
         <Tab.Screen name="NOTIFICATION" component={NotificationScreen} />
         <Tab.Screen name="PROFILE" component={ProfileScreen} />
       </Tab.Navigator>
