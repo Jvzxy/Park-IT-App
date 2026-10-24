@@ -16,7 +16,7 @@ export default function MapScreen() {
             <View>
               <Text style={styles.headerTitle}>Park-IT</Text>
               <Text style={styles.headerSubtitle}>USTP-CDO PARKING SPACE</Text>
-            </View>
+            </View> 
           </View>
         </View>
 
