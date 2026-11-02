@@ -3,14 +3,21 @@ import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import LoginScreen from './src/screens/LoginScreen';
-import HomeScreen from './src/screens/HomeScreen';
-import MapScreen from './src/screens/MapScreen';
-import NotificationScreen from './src/screens/NotificationScreen';
-import ProfileScreen from './src/screens/ProfileScreen';
-import ReportScreen from './src/screens/ReportScreen';
+// Main Screens
+import LoginScreen from './src/screens/User/LoginScreen';
+import HomeScreen from './src/screens/User/HomeScreen';
+import MapScreen from './src/screens/User/MapScreen';
+import NotificationScreen from './src/screens/User/NotificationScreen';
+import ProfileScreen from './src/screens/User/ProfileScreen';
+import ReportScreen from './src/screens/User/ReportScreen';
+
+// Sub-Screens
+import ForgotPasswordScreen from './src/screens/User/ForgotPasswordScreen';
+import ReportHistoryScreen from './src/screens/User/ReportHistoryScreen';
+import EditProfileScreen from './src/screens/User/EditProfileScreen';
+import ChangePasswordScreen from './src/screens/User/ChangePasswordScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -24,6 +31,8 @@ const MyTheme = {
 };
 
 function MainTabs() {
+  const insets = useSafeAreaInsets();
+
   return (
     <Tab.Navigator
       initialRouteName="HOME"
@@ -32,8 +41,8 @@ function MainTabs() {
         tabBarStyle: {
           backgroundColor: '#0B1120',
           borderTopColor: '#1e293b',
-          height: 70,
-          paddingBottom: 10,
+          height: 60 + insets.bottom, 
+          paddingBottom: insets.bottom > 0 ? insets.bottom : 10,
           paddingTop: 10,
         },
         tabBarActiveTintColor: '#fbbf24',
@@ -65,7 +74,11 @@ export default function App() {
       <NavigationContainer theme={MyTheme}>
         <Stack.Navigator initialRouteName="Login" screenOptions={{ headerShown: false }}>
           <Stack.Screen name="Login" component={LoginScreen} />
+          <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
           <Stack.Screen name="MainTabs" component={MainTabs} />
+          <Stack.Screen name="ReportHistory" component={ReportHistoryScreen} />
+          <Stack.Screen name="EditProfile" component={EditProfileScreen} />
+          <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, Image } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -21,7 +21,11 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.keyboardView}>
         <View style={styles.content}>
           <View style={styles.brandingContainer}>
-            <View style={styles.logoBox} />
+            <Image 
+              source={require('../assets/logo/Park-IT Logo.png')} 
+              style={styles.logoImage} 
+              resizeMode="contain" 
+            />
             <Text style={styles.brandTitle}>Park-IT</Text>
             <Text style={styles.brandSubtitle}>USTP-CDO PARKING SPACE</Text>
           </View>
@@ -57,7 +61,11 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
             </TouchableOpacity>
           </View>
 
-          <TouchableOpacity style={styles.forgotPassword}>
+          {/* UPDATED: Added onPress navigation to ForgotPassword */}
+          <TouchableOpacity 
+            style={styles.forgotPassword} 
+            onPress={() => navigation.navigate('ForgotPassword')}
+          >
             <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
           </TouchableOpacity>
 
@@ -75,7 +83,7 @@ const styles = StyleSheet.create({
   keyboardView: { flex: 1 },
   content: { flex: 1, padding: 24, justifyContent: 'center' },
   brandingContainer: { alignItems: 'center', marginBottom: 40 },
-  logoBox: { width: 60, height: 60, backgroundColor: '#fff', borderRadius: 12, marginBottom: 15 },
+  logoImage: { width: 80, height: 80, backgroundColor: '#fff', borderRadius: 12, marginBottom: 15, alignSelf: 'center' },
   brandTitle: { color: '#fff', fontSize: 28, fontWeight: 'bold' },
   brandSubtitle: { color: '#94a3b8', fontSize: 12, letterSpacing: 1, marginTop: 4 },
   welcomeText: { color: '#fff', fontSize: 24, fontWeight: 'bold', marginBottom: 5 },
