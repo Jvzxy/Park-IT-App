@@ -2,33 +2,27 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-// 1. Pass the navigation prop here
-export default function HomeScreen({ navigation }) {
+interface HomeScreenProps {
+  navigation: any;
+}
+
+export default function HomeScreen({ navigation }: HomeScreenProps) {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        
-        {/* Header */}
         <View style={styles.header}>
           <View style={styles.logoContainer}>
-            {/* Placeholder for Logo */}
             <View style={styles.logoBox} />
             <View>
               <Text style={styles.headerTitle}>Park-IT</Text>
               <Text style={styles.headerSubtitle}>USTP-CDO PARKING SPACE</Text>
             </View>
           </View>
-          
-          {/* 2. Add the onPress navigation event here */}
-          <TouchableOpacity 
-            style={styles.reportBtn}
-            onPress={() => navigation.navigate('REPORT')}
-          >
+          <TouchableOpacity style={styles.reportBtn} onPress={() => navigation.navigate('REPORT')}>
             <Text style={styles.reportBtnText}>Report</Text>
           </TouchableOpacity>
         </View>
 
-        {/* Total Availability Card */}
         <View style={styles.mainCard}>
           <View style={styles.cardHeader}>
             <Text style={styles.cardTitle}>TOTAL PARKING{'\n'}AVAILABILITY</Text>
@@ -37,16 +31,13 @@ export default function HomeScreen({ navigation }) {
               <Text style={styles.liveText}>LIVE</Text>
             </View>
           </View>
-          
           <View style={styles.statsRow}>
             <Text style={styles.highlightNumber}>98</Text>
             <Text style={styles.subNumber}> / 200 Slots Free</Text>
           </View>
-          
           <Text style={styles.description}>
             Real-time parking capacity across monitored USTP zones. Smart sensors automatically detect vacant and occupied spaces, allowing students to check availability before entering the parking area.
           </Text>
-
           <View style={styles.progressBarBg}>
             <View style={[styles.progressBarFill, { width: '44%', backgroundColor: '#34d399' }]} />
           </View>
@@ -56,12 +47,14 @@ export default function HomeScreen({ navigation }) {
           </View>
         </View>
 
-        {/* Recommend Zone */}
         <Text style={styles.sectionTitle}>RECOMMEND ZONE TO GO</Text>
         <View style={styles.zoneCard}>
           <View style={styles.zoneHeader}>
             <View>
-              <Text style={styles.zoneName}>Zone B <View style={styles.statusDotGreen} /></Text>
+              <View style={styles.zoneNameRow}>
+                <Text style={styles.zoneName}>Zone B</Text>
+                <View style={styles.statusDotGreen} />
+              </View>
               <Text style={styles.zoneStatusGreen}>OPEN - Parking spaces are available</Text>
             </View>
             <View style={styles.zoneStatsRight}>
@@ -77,17 +70,18 @@ export default function HomeScreen({ navigation }) {
           </View>
         </View>
 
-        {/* Campus Parking Zones */}
         <View style={styles.sectionHeaderRow}>
           <Text style={styles.sectionTitle}>CAMPUS PARKING ZONES</Text>
           <Text style={styles.activeZonesText}>2 Zones Active</Text>
         </View>
 
-        {/* Zone A - Full */}
         <View style={styles.zoneCard}>
           <View style={styles.zoneHeader}>
             <View>
-              <Text style={styles.zoneName}>Zone A <View style={styles.statusDotRed} /></Text>
+              <View style={styles.zoneNameRow}>
+                <Text style={styles.zoneName}>Zone A</Text>
+                <View style={styles.statusDotRed} />
+              </View>
               <Text style={styles.zoneStatusRed}>CLOSE - Parking spaces are full</Text>
             </View>
             <View style={styles.zoneStatsRight}>
@@ -103,11 +97,13 @@ export default function HomeScreen({ navigation }) {
           </View>
         </View>
 
-        {/* Zone B - Duplicate for list */}
         <View style={styles.zoneCard}>
           <View style={styles.zoneHeader}>
             <View>
-              <Text style={styles.zoneName}>Zone B <View style={styles.statusDotGreen} /></Text>
+              <View style={styles.zoneNameRow}>
+                <Text style={styles.zoneName}>Zone B</Text>
+                <View style={styles.statusDotGreen} />
+              </View>
               <Text style={styles.zoneStatusGreen}>OPEN - Parking spaces are available</Text>
             </View>
             <View style={styles.zoneStatsRight}>
@@ -122,7 +118,6 @@ export default function HomeScreen({ navigation }) {
             <Text style={styles.zonePercentGreen}>96% Avail.</Text>
           </View>
         </View>
-
       </ScrollView>
     </SafeAreaView>
   );
@@ -138,7 +133,6 @@ const styles = StyleSheet.create({
   headerSubtitle: { color: '#94a3b8', fontSize: 10 },
   reportBtn: { backgroundColor: '#ef4444', paddingVertical: 8, paddingHorizontal: 16, borderRadius: 20 },
   reportBtnText: { color: '#fff', fontWeight: 'bold', fontSize: 12 },
-  
   mainCard: { backgroundColor: '#1e293b', borderRadius: 15, padding: 20, marginBottom: 25 },
   cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
   cardTitle: { color: '#94a3b8', fontSize: 14, fontWeight: 'bold', letterSpacing: 1 },
@@ -154,14 +148,13 @@ const styles = StyleSheet.create({
   progressLabels: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 8 },
   progressGreenText: { color: '#34d399', fontSize: 12, fontWeight: '600' },
   progressGrayText: { color: '#64748b', fontSize: 12 },
-
   sectionTitle: { color: '#f8fafc', fontSize: 14, fontWeight: 'bold', marginBottom: 15, marginTop: 10 },
   sectionHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   activeZonesText: { color: '#64748b', fontSize: 12 },
-  
   zoneCard: { backgroundColor: '#1e293b', borderRadius: 12, padding: 15, marginBottom: 15 },
   zoneHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 15 },
-  zoneName: { color: '#f8fafc', fontSize: 16, fontWeight: 'bold', marginBottom: 4 },
+  zoneNameRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 4 },
+  zoneName: { color: '#f8fafc', fontSize: 16, fontWeight: 'bold' },
   statusDotGreen: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#34d399', marginLeft: 5 },
   statusDotRed: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#ef4444', marginLeft: 5 },
   zoneStatusGreen: { color: '#34d399', fontSize: 11 },
