@@ -1,20 +1,90 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
+import React, { useCallback, useState } from 'react';
+import { ActivityIndicator, RefreshControl, View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
 import { Feather } from '@expo/vector-icons';
+import { supabase } from '../lib/supabase';
+
+interface ParkingZone {
+  id: number;
+  name: string;
+  description: string | null;
+  capacity: number;
+  current_occupancy: number;
+  status: string;
+  is_active: boolean;
+}
+
+interface Announcement {
+  id: number;
+  message: string;
+}
 
 interface HomeScreenProps {
   navigation: any;
 }
 
 export default function HomeScreen({ navigation }: HomeScreenProps) {
+  const [zones, setZones] = useState<ParkingZone[]>([]);
+  const [announcement, setAnnouncement] = useState<Announcement | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const loadDashboard = useCallback(async () => {
+    const [zonesResult, announcementsResult] = await Promise.all([
+      supabase
+        .from('parking_zones')
+        .select('id, name, description, capacity, current_occupancy, status, is_active')
+        .eq('is_active', true)
+        .order('name'),
+      supabase
+        .from('announcements')
+        .select('id, message, expires_at')
+        .eq('is_active', true)
+        .order('created_at', { ascending: false })
+        .limit(1),
+    ]);
+
+    if (zonesResult.error || announcementsResult.error) {
+      setErrorMessage(zonesResult.error?.message ?? announcementsResult.error?.message ?? 'Unable to load parking data.');
+    } else {
+      setErrorMessage(null);
+      setZones(zonesResult.data ?? []);
+      const currentAnnouncement = announcementsResult.data?.[0];
+      setAnnouncement(
+        currentAnnouncement && (!currentAnnouncement.expires_at || new Date(currentAnnouncement.expires_at) > new Date())
+          ? currentAnnouncement
+          : null,
+      );
+    }
+    setIsLoading(false);
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      setIsLoading(true);
+      void loadDashboard();
+    }, [loadDashboard]),
+  );
+
+  const totalCapacity = zones.reduce((total, zone) => total + zone.capacity, 0);
+  const totalOccupied = zones.reduce((total, zone) => total + zone.current_occupancy, 0);
+  const totalAvailable = totalCapacity - totalOccupied;
+  const availablePercent = totalCapacity ? Math.round((totalAvailable / totalCapacity) * 100) : 0;
+  const recommendedZone = zones
+    .filter((zone) => zone.capacity > zone.current_occupancy)
+    .sort((left, right) => (left.current_occupancy / left.capacity) - (right.current_occupancy / right.capacity))[0];
+
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        refreshControl={<RefreshControl refreshing={isLoading} onRefresh={loadDashboard} tintColor="#fbbf24" />}
+      >
         <View style={styles.header}>
           <View style={styles.logoContainer}>
             <Image 
-              source={require('../assets/logo/Park-IT Logo.png')} 
+              source={require('../../assets/logo/Park-IT Logo.png')}
               style={styles.logoImage} 
               resizeMode="contain" 
             />
@@ -28,16 +98,17 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
           </TouchableOpacity>
         </View>
 
-        {/* NEW: Parking Announcements */}
-        <View style={styles.announcementCard}>
-          <View style={styles.announcementHeader}>
-            <Feather name="bell" size={16} color="#fbbf24" />
-            <Text style={styles.announcementTitle}>LATEST ANNOUNCEMENT</Text>
+        {announcement ? (
+          <View style={styles.announcementCard}>
+            <View style={styles.announcementHeader}>
+              <Feather name="bell" size={16} color="#fbbf24" />
+              <Text style={styles.announcementTitle}>LATEST ANNOUNCEMENT</Text>
+            </View>
+            <Text style={styles.announcementText}>{announcement.message}</Text>
           </View>
-          <Text style={styles.announcementText}>
-            Maintenance scheduled for Zone A entry lanes tomorrow from 8:00 AM to 12:00 PM. Please use alternate routes.
-          </Text>
-        </View>
+        ) : null}
+
+        {errorMessage ? <Text style={styles.errorText}>{errorMessage}</Text> : null}
 
         <View style={styles.mainCard}>
           <View style={styles.cardHeader}>
@@ -48,43 +119,64 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
             </View>
           </View>
           <View style={styles.statsRow}>
-            <Text style={styles.highlightNumber}>98</Text>
-            <Text style={styles.subNumber}> / 200 Slots Free</Text>
+            <Text style={styles.highlightNumber}>{isLoading ? '—' : totalAvailable}</Text>
+            <Text style={styles.subNumber}> / {totalCapacity} Slots Free</Text>
           </View>
           <Text style={styles.description}>
             Real-time parking capacity across monitored USTP zones. Smart sensors automatically detect vacant and occupied spaces.
           </Text>
           <View style={styles.progressBarBg}>
-            <View style={[styles.progressBarFill, { width: '44%', backgroundColor: '#34d399' }]} />
+            <View style={[styles.progressBarFill, { width: `${availablePercent}%`, backgroundColor: '#34d399' }]} />
           </View>
           <View style={styles.progressLabels}>
-            <Text style={styles.progressGreenText}>44% Open Capacity</Text>
-            <Text style={styles.progressGrayText}>102 Occupied</Text>
+            <Text style={styles.progressGreenText}>{availablePercent}% Open Capacity</Text>
+            <Text style={styles.progressGrayText}>{totalOccupied} Occupied</Text>
           </View>
         </View>
 
         <Text style={styles.sectionTitle}>RECOMMEND ZONE TO GO</Text>
-        <View style={styles.zoneCard}>
-          <View style={styles.zoneHeader}>
-            <View>
-              <View style={styles.zoneNameRow}>
-                <Text style={styles.zoneName}>Zone B</Text>
-                <View style={styles.statusDotGreen} />
-              </View>
-              <Text style={styles.zoneStatusGreen}>OPEN - Parking spaces are available</Text>
-            </View>
-            <View style={styles.zoneStatsRight}>
-              <Text style={styles.zoneOpenNumber}>98 Open</Text>
-              <Text style={styles.zoneTotalText}>of 100 Slots</Text>
-            </View>
-          </View>
-          <View style={styles.zoneProgressRow}>
-            <View style={[styles.progressBarBg, { flex: 1, marginRight: 10 }]}>
-              <View style={[styles.progressBarFill, { width: '96%', backgroundColor: '#34d399' }]} />
-            </View>
-            <Text style={styles.zonePercentGreen}>96% Avail.</Text>
-          </View>
+        {isLoading ? (
+          <ActivityIndicator color="#fbbf24" />
+        ) : recommendedZone ? (
+          <Text style={styles.recommendationText}>
+            {recommendedZone.name} has {recommendedZone.capacity - recommendedZone.current_occupancy} spaces available.
+          </Text>
+        ) : (
+          <Text style={styles.recommendationText}>No parking spaces are currently available.</Text>
+        )}
+
+        <View style={styles.sectionHeaderRow}>
+          <Text style={styles.sectionTitle}>CAMPUS PARKING ZONES</Text>
+          <Text style={styles.activeZonesText}>{zones.length} Active</Text>
         </View>
+        {zones.map((zone) => {
+          const available = zone.capacity - zone.current_occupancy;
+          const isOpen = available > 0;
+          const availabilityPercent = zone.capacity ? Math.round((available / zone.capacity) * 100) : 0;
+          return (
+            <View key={zone.id} style={styles.zoneCard}>
+              <View style={styles.zoneHeader}>
+                <View>
+                  <View style={styles.zoneNameRow}>
+                    <Text style={styles.zoneName}>{zone.name}</Text>
+                    <View style={[styles.statusDotGreen, !isOpen && styles.statusDotRed]} />
+                  </View>
+                  <Text style={[styles.zoneStatusGreen, !isOpen && styles.zoneStatusRed]}>{zone.status}</Text>
+                </View>
+                <View style={styles.zoneStatsRight}>
+                  <Text style={[styles.zoneOpenNumber, !isOpen && styles.zoneClosedNumber]}>{available} Open</Text>
+                  <Text style={styles.zoneTotalText}>of {zone.capacity} Slots</Text>
+                </View>
+              </View>
+              <View style={styles.zoneProgressRow}>
+                <View style={[styles.progressBarBg, { flex: 1, marginRight: 10 }]}>
+                  <View style={[styles.progressBarFill, { width: `${availabilityPercent}%`, backgroundColor: isOpen ? '#34d399' : '#ef4444' }]} />
+                </View>
+                <Text style={[styles.zonePercentGreen, !isOpen && styles.zonePercentRed]}>{availabilityPercent}% Avail.</Text>
+              </View>
+            </View>
+          );
+        })}
       </ScrollView>
     </SafeAreaView>
   );
@@ -125,10 +217,18 @@ const styles = StyleSheet.create({
   zoneNameRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 4 },
   zoneName: { color: '#f8fafc', fontSize: 16, fontWeight: 'bold' },
   statusDotGreen: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#34d399', marginLeft: 5 },
+  statusDotRed: { backgroundColor: '#ef4444' },
   zoneStatusGreen: { color: '#34d399', fontSize: 11 },
+  zoneStatusRed: { color: '#ef4444', fontSize: 11 },
   zoneStatsRight: { alignItems: 'flex-end' },
   zoneOpenNumber: { color: '#34d399', fontSize: 22, fontWeight: 'bold' },
+  zoneClosedNumber: { color: '#ef4444', fontSize: 22, fontWeight: 'bold' },
   zoneTotalText: { color: '#64748b', fontSize: 11 },
   zoneProgressRow: { flexDirection: 'row', alignItems: 'center' },
   zonePercentGreen: { color: '#34d399', fontSize: 12, fontWeight: 'bold', width: 60, textAlign: 'right' },
+  zonePercentRed: { color: '#ef4444', fontSize: 12, fontWeight: 'bold', width: 60, textAlign: 'right' },
+  recommendationText: { color: '#94a3b8', fontSize: 13, marginBottom: 10 },
+  errorText: { color: '#fca5a5', fontSize: 12, marginBottom: 12 },
+  sectionHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  activeZonesText: { color: '#64748b', fontSize: 12 },
 });

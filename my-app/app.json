@@ -2,6 +2,7 @@
   "expo": {
     "name": "my-app",
     "slug": "my-app",
+    "scheme": "parkit",
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
@@ -10,7 +11,13 @@
     },
     "plugins": [
       "expo-status-bar",
-      "expo-font"
+      "expo-font",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow Park-IT to attach a photo to a parking report."
+        }
+      ]
     ]
   }
 }

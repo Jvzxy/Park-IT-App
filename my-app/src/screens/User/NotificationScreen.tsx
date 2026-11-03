@@ -1,56 +1,80 @@
-import React from 'react';
-import { View, Text, StyleSheet, SafeAreaView, ScrollView } from 'react-native';
+import React, { useCallback, useState } from 'react';
+import { ActivityIndicator, RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
+import { supabase } from '../lib/supabase';
+
+interface UserNotification {
+  id: number;
+  message: string;
+  is_read: boolean;
+  created_at: string;
+}
 
 export default function NotificationScreen() {
+  const [notifications, setNotifications] = useState<UserNotification[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const loadNotifications = useCallback(async () => {
+    const { data, error } = await supabase
+      .from('notifications')
+      .select('id, message, is_read, created_at')
+      .order('created_at', { ascending: false })
+      .limit(100);
+
+    if (error) {
+      setErrorMessage(error.message);
+    } else {
+      setErrorMessage(null);
+      setNotifications(data ?? []);
+    }
+    setIsLoading(false);
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      setIsLoading(true);
+      void loadNotifications();
+    }, [loadNotifications]),
+  );
+
+  const markRead = async (id: number) => {
+    const { error } = await supabase.from('notifications').update({ is_read: true }).eq('id', id);
+    if (error) {
+      setErrorMessage(error.message);
+      return;
+    }
+    setNotifications((current) => current.map((item) => item.id === id ? { ...item, is_read: true } : item));
+  };
+
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        
-        {/* Header */}
-        <View style={styles.header}>
-          <View style={styles.logoContainer}>
-            <View style={styles.logoBox} />
-            <View>
-              <Text style={styles.headerTitle}>Park-IT</Text>
-              <Text style={styles.headerSubtitle}>USTP-CDO PARKING SPACE</Text>
-            </View>
-          </View>
-        </View>
-
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        refreshControl={<RefreshControl refreshing={isLoading} onRefresh={loadNotifications} tintColor="#fbbf24" />}
+      >
         <Text style={styles.pageTitle}>Notifications</Text>
-
-        {/* Card 1: Recent Zone Activity */}
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>RECENT ZONE ACTIVITY</Text>
-          
-          <View style={styles.listItem}>
-            <View style={styles.bulletRed} />
-            <Text style={styles.itemText}>1:04 PM - Zone B reached full capacity</Text>
+        <Text style={styles.subtitle}>Parking updates and report status changes.</Text>
+        {errorMessage ? <Text style={styles.errorText}>{errorMessage}</Text> : null}
+        {isLoading ? <ActivityIndicator color="#fbbf24" /> : null}
+        {!isLoading && !notifications.length ? (
+          <View style={styles.card}><Text style={styles.emptyText}>You’re all caught up.</Text></View>
+        ) : null}
+        {notifications.map((notification) => (
+          <View key={notification.id} style={[styles.card, !notification.is_read && styles.unreadCard]}>
+            <View style={styles.notificationHeader}>
+              <Text style={styles.cardTitle}>{notification.is_read ? 'UPDATE' : 'NEW UPDATE'}</Text>
+              <Text style={styles.dateText}>{new Date(notification.created_at).toLocaleString()}</Text>
+            </View>
+            <Text style={styles.itemText}>{notification.message}</Text>
+            {!notification.is_read ? (
+              <TouchableOpacity style={styles.markReadButton} onPress={() => void markRead(notification.id)}>
+                <Text style={styles.markReadText}>Mark as read</Text>
+              </TouchableOpacity>
+            ) : null}
           </View>
-          <View style={styles.listItem}>
-            <View style={styles.bulletRed} />
-            <Text style={styles.itemText}>12:48 PM - Zone B reached full capacity</Text>
-          </View>
-          <View style={styles.listItem}>
-            <View style={styles.bulletRed} />
-            <Text style={styles.itemText}>12:15 PM - Zone A reached full capacity</Text>
-          </View>
-        </View>
-
-        {/* Card 2: Spot Open! */}
-        <View style={styles.card}>
-          <Text style={styles.cardTitleWhite}>Spot Open!</Text>
-          
-          <View style={styles.listItem}>
-            <View style={styles.bulletRed} />
-            <Text style={styles.itemText}>1:58 PM - Zone B. 2 spaces just freed up.</Text>
-          </View>
-          <View style={styles.listItem}>
-            <View style={styles.bulletRed} />
-            <Text style={styles.itemText}>2:30 PM - Zone A. 5 spaces just freed up.</Text>
-          </View>
-        </View>
-
+        ))}
       </ScrollView>
     </SafeAreaView>
   );
@@ -59,17 +83,16 @@ export default function NotificationScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#0B1120' },
   scrollContent: { padding: 20 },
-  header: { flexDirection: 'row', marginBottom: 20 },
-  logoContainer: { flexDirection: 'row', alignItems: 'center' },
-  logoBox: { width: 40, height: 40, backgroundColor: '#fff', borderRadius: 5, marginRight: 10 },
-  headerTitle: { color: '#fff', fontSize: 18, fontWeight: 'bold' },
-  headerSubtitle: { color: '#94a3b8', fontSize: 10 },
-
-  pageTitle: { color: '#fff', fontSize: 22, fontWeight: 'bold', marginBottom: 20 },
-  card: { backgroundColor: '#1e293b', borderRadius: 15, padding: 20, marginBottom: 20 },
-  cardTitle: { color: '#94a3b8', fontSize: 13, fontWeight: 'bold', letterSpacing: 1, marginBottom: 15 },
-  cardTitleWhite: { color: '#fff', fontSize: 18, fontWeight: 'bold', marginBottom: 15 },
-  listItem: { flexDirection: 'row', alignItems: 'center', marginBottom: 12 },
-  bulletRed: { width: 6, height: 6, borderRadius: 3, backgroundColor: '#ef4444', marginRight: 10 },
-  itemText: { color: '#f8fafc', fontSize: 13, flex: 1 },
+  pageTitle: { color: '#fff', fontSize: 24, fontWeight: 'bold' },
+  subtitle: { color: '#94a3b8', fontSize: 13, marginTop: 5, marginBottom: 20 },
+  card: { backgroundColor: '#1e293b', borderRadius: 14, padding: 16, marginBottom: 12 },
+  unreadCard: { borderWidth: 1, borderColor: '#fbbf24' },
+  notificationHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
+  cardTitle: { color: '#fbbf24', fontSize: 11, fontWeight: 'bold', letterSpacing: 1 },
+  dateText: { color: '#64748b', fontSize: 10 },
+  itemText: { color: '#f8fafc', fontSize: 14, lineHeight: 20 },
+  markReadButton: { alignSelf: 'flex-start', marginTop: 12, paddingVertical: 5 },
+  markReadText: { color: '#60a5fa', fontSize: 12, fontWeight: '600' },
+  emptyText: { color: '#94a3b8', textAlign: 'center', padding: 10 },
+  errorText: { color: '#fca5a5', marginBottom: 12 },
 });
