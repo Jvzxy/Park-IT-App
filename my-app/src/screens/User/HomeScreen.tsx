@@ -11,7 +11,6 @@ const GUIDE_STORAGE_KEY = 'park-it-user-guide-seen';
 const navigationGuide = [
   { icon: 'home', title: 'Home', description: 'Check total parking availability, announcements, and the recommended zone.', route: 'HOME' },
   { icon: 'map', title: 'Map', description: 'Explore parking zones and tap a zone for its location and available spaces.', route: 'MAP' },
-  { icon: 'flag', title: 'Report', description: 'Send a parking issue to staff and include details to help them respond.', route: 'REPORT' },
   { icon: 'bell', title: 'Notifications', description: 'Review updates about your reports and important campus announcements.', route: 'NOTIFICATION' },
   { icon: 'user', title: 'Profile', description: 'Manage your profile, vehicle details, reports, and account settings.', route: 'PROFILE' },
 ] as const;
@@ -157,16 +156,6 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
             <Text style={styles.guideButtonText}>Guide</Text>
           </TouchableOpacity>
         </View>
-
-        <TouchableOpacity
-          style={styles.reportBtn}
-          onPress={() => navigation.navigate('REPORT')}
-          accessibilityRole="button"
-          accessibilityLabel="Report a parking issue"
-        >
-          <Feather name="flag" size={16} color="#fff" />
-          <Text style={styles.reportBtnText}>Report a Parking Issue</Text>
-        </TouchableOpacity>
 
         {announcement ? (
           <View style={styles.announcementCard}>
@@ -316,8 +305,6 @@ const styles = StyleSheet.create({
   logoImage: { width: 40, height: 40, backgroundColor: '#fff', borderRadius: 5, marginRight: 10, alignSelf: 'center' },
   headerTitle: { color: '#fff', fontSize: 18, fontWeight: 'bold' },
   headerSubtitle: { color: '#94a3b8', fontSize: 10 },
-  reportBtn: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 9, alignSelf: 'center', backgroundColor: '#ef4444', paddingVertical: 12, paddingHorizontal: 22, borderRadius: 12, marginBottom: 20, minWidth: 220 },
-  reportBtnText: { color: '#fff', fontWeight: 'bold', fontSize: 13 },
   guideButton: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingVertical: 8, paddingHorizontal: 10, borderWidth: 1, borderColor: '#334155', borderRadius: 18 },
   guideButtonText: { color: '#fbbf24', fontSize: 12, fontWeight: '600' },
   announcementCard: { backgroundColor: 'rgba(251, 191, 36, 0.1)', borderWidth: 1, borderColor: 'rgba(251, 191, 36, 0.3)', borderRadius: 12, padding: 15, marginBottom: 20 },

@@ -55,16 +55,25 @@ function MainTabs() {
         tabBarStyle: {
           backgroundColor: '#0B1120',
           borderTopColor: '#1e293b',
-          height: 60 + insets.bottom, 
+          height: 60 + insets.bottom,
           paddingBottom: insets.bottom > 0 ? insets.bottom : 10,
           paddingTop: 10,
         },
         tabBarActiveTintColor: '#fbbf24',
         tabBarInactiveTintColor: '#f8fafc',
+        tabBarLabelStyle: {
+          fontSize: 10,
+          fontWeight: '600',
+        },
+        tabBarItemStyle: {
+          justifyContent: 'center',
+          alignItems: 'center',
+        },
         tabBarIcon: ({ focused, color }) => {
           let iconName: any;
           if (route.name === 'HOME') iconName = focused ? 'home' : 'home-outline';
           else if (route.name === 'MAP') iconName = focused ? 'map' : 'map-outline';
+          else if (route.name === 'REPORT') iconName = focused ? 'flag' : 'flag-outline';
           else if (route.name === 'NOTIFICATION') iconName = focused ? 'notifications' : 'notifications-outline';
           else if (route.name === 'PROFILE') iconName = focused ? 'person' : 'person-outline';
 
@@ -75,7 +84,7 @@ function MainTabs() {
     >
       <Tab.Screen name="HOME" component={HomeScreen} />
       <Tab.Screen name="MAP" component={MapScreen} />
-      <Tab.Screen name="REPORT" component={ReportScreen} options={{ tabBarButton: () => null }} />
+      <Tab.Screen name="REPORT" component={ReportScreen} />
       <Tab.Screen name="NOTIFICATION" component={NotificationScreen} />
       <Tab.Screen name="PROFILE" component={ProfileScreen} />
     </Tab.Navigator>
