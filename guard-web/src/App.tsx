@@ -491,7 +491,24 @@ function InvitePasswordSetup({ onComplete }: { onComplete: () => void }) {
 
 function ZoneProgress({ zone }: { zone: Zone }) {
   const percent = zone.capacity > 0 ? Math.min(100, Math.round((zone.current_occupancy / zone.capacity) * 100)) : 0;
-  return <div className="zone-progress"><div className="zone-progress-top"><div><strong>{zone.name}</strong><span className="muted">{zone.is_active ? zone.status : "Inactive"}</span></div><span>{zone.current_occupancy} / {zone.capacity}</span></div><div className="progress-track"><div className={`progress-value ${percent >= 90 ? "warning" : ""}`} style={{ width: `${percent}%` }} /></div><small>{percent}% occupied{zone.description ? ` · ${zone.description}` : ""}</small></div>;
+  const isFull = zone.status.toLowerCase() === "full" || (zone.capacity > 0 && zone.current_occupancy >= zone.capacity);
+  const isNearlyFull = !isFull && (zone.status.toLowerCase().includes("nearly full") || percent >= 90);
+  const statusClass = zone.is_active && isFull ? "full" : zone.is_active && isNearlyFull ? "warning" : "";
+  return (
+    <div className="zone-progress">
+      <div className="zone-progress-top">
+        <div>
+          <strong>{zone.name}</strong>
+          <span className={`muted zone-status ${statusClass}`}>{zone.is_active ? zone.status : "Inactive"}</span>
+        </div>
+        <span>{zone.current_occupancy} / {zone.capacity}</span>
+      </div>
+      <div className="progress-track">
+        <div className={`progress-value ${statusClass}`} style={{ width: `${percent}%` }} />
+      </div>
+      <small>{percent}% occupied{zone.description ? ` · ${zone.description}` : ""}</small>
+    </div>
+  );
 }
 
 function ReportTable({ reports, zoneNames }: { reports: Report[]; zoneNames: Map<number, string> }) {

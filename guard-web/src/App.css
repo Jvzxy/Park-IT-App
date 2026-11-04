@@ -62,9 +62,12 @@ h2{font-size:1.04rem;margin-bottom:8px}
 .zone-progress-top{display:flex;justify-content:space-between;gap:12px;font-size:.78rem}
 .zone-progress-top>div{display:flex;gap:9px;align-items:center}
 .zone-progress-top .muted{font-size:.69rem}
+.zone-status.warning{color:var(--amber)}
+.zone-status.full{color:var(--red)}
 .progress-track{height:6px;border-radius:8px;background:#26344a;margin:9px 0 6px;overflow:hidden}
 .progress-value{height:100%;border-radius:inherit;background:var(--green)}
 .progress-value.warning{background:var(--amber)}
+.progress-value.full{background:var(--red)}
 .zone-progress>small{font-size:.66rem;color:#8190a4}
 .summary-row{display:flex;align-items:center;padding:12px 0;border-bottom:1px solid #26344a;font-size:.8rem}
 .summary-row:last-child{border-bottom:0}
