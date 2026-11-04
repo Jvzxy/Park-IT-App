@@ -11,6 +11,7 @@ const GUIDE_STORAGE_KEY = 'park-it-user-guide-seen';
 const navigationGuide = [
   { icon: 'home', title: 'Home', description: 'Check total parking availability, announcements, and the recommended zone.', route: 'HOME' },
   { icon: 'map', title: 'Map', description: 'Explore parking zones and tap a zone for its location and available spaces.', route: 'MAP' },
+  { icon: 'flag', title: 'Report', description: 'Send a parking issue to staff and include details to help them respond.', route: 'REPORT' },
   { icon: 'bell', title: 'Notifications', description: 'Review updates about your reports and important campus announcements.', route: 'NOTIFICATION' },
   { icon: 'user', title: 'Profile', description: 'Manage your profile, vehicle details, reports, and account settings.', route: 'PROFILE' },
 ] as const;
