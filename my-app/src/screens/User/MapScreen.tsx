@@ -5,6 +5,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../lib/supabase';
 import ZoneModel3D from '../../components/ZoneModel3D';
+import ZoneScene3D from '../../components/ZoneScene3D';
 
 interface ParkingZone {
   id: number;
@@ -103,7 +104,7 @@ export default function MapScreen() {
         </Text>
       </ScrollView>
 
-      {/* MODAL POPUPS WITH EXACT GEOMETRY */}
+      {/* Zone details use the detailed, interactive 3D scene. */}
       <Modal visible={selectedZone !== null} transparent animationType="fade">
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
@@ -126,12 +127,11 @@ export default function MapScreen() {
 
             <View style={styles.floorPlanBg}>
               {selectedZone ? (
-                <ZoneModel3D
-                  view={selectedZone.name.includes('A') ? 'A' : 'B'}
+                <ZoneScene3D
+                  zone={selectedZone.name.toUpperCase().includes('A') ? 'A' : 'B'}
+                  occupancy={selectedZone.capacity > 0 ? selectedZone.current_occupancy / selectedZone.capacity : 0}
                   height={340}
-                  tilt={25}
                   backgroundColor="#f8fafc"
-                  animate
                 />
               ) : null}
             </View>
