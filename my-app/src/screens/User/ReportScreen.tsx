@@ -240,7 +240,7 @@ export default function ReportScreen() {
           textAlignVertical="top"
         />
 
-        <Text style={styles.label}><Feather name="camera" size={14} color="#94a3b8" /> Photo (optional)</Text>
+        <Text style={styles.label}><Feather name="camera" size={14} color="#94a3b8" /> Photo</Text>
         <TouchableOpacity style={styles.uploadCard} activeOpacity={0.7} onPress={choosePhoto}>
           {photo ? (
             <>

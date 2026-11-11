@@ -44,13 +44,28 @@ export default function MapScreen() {
     }, [loadZones]),
   );
 
+  // Status color logic updated:
+  // Available -> Green (#34d399)
+  // Nearly Full (<= 10% remaining) -> Yellow (#fbbf24)
+  // Full (0 remaining) -> Red (#ef4444)
   const getZoneStatusColor = (zoneLetter: string, fallbackColor: string) => {
     const zone = zones.find(z => z.name.toUpperCase().includes(zoneLetter));
     if (!zone) return fallbackColor;
     const availability = zone.capacity - zone.current_occupancy;
-    if (availability === 0) return '#ef4444'; 
-    if (availability / zone.capacity <= 0.1) return '#fbbf24'; 
-    return '#34d399'; 
+    if (availability <= 0) return '#ef4444'; // Red (Full)
+    if (availability / zone.capacity <= 0.1) return '#fbbf24'; // Yellow (Nearly Full)
+    return '#34d399'; // Green (Available)
+  };
+
+  const getZoneStatusTextAndColor = (zone: ParkingZone) => {
+    const availability = zone.capacity - zone.current_occupancy;
+    if (availability <= 0) {
+      return { text: 'Full', color: '#ef4444' };
+    }
+    if (availability / zone.capacity <= 0.1) {
+      return { text: 'Nearly Full', color: '#fbbf24' };
+    }
+    return { text: 'Available', color: '#10b981' };
   };
 
   const handleZonePress = (zoneLetter: string) => {
@@ -87,7 +102,7 @@ export default function MapScreen() {
         {errorMessage ? <Text style={styles.errorText}>{errorMessage}</Text> : null}
         {isLoading ? <ActivityIndicator color="#fbbf24" /> : null}
         
-        {/* MAIN MAP: 3D model built from the Blender coordinates (tap a zone to open its floor plan) */}
+        {/* MAIN MAP */}
         <View style={styles.mapContainer}>
           <ZoneModel3D
             view="map"
@@ -104,7 +119,7 @@ export default function MapScreen() {
         </Text>
       </ScrollView>
 
-      {/* Zone details use the detailed, interactive 3D scene. */}
+      {/* Zone Details Modal */}
       <Modal visible={selectedZone !== null} transparent animationType="fade">
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
@@ -114,16 +129,19 @@ export default function MapScreen() {
             
             <Text style={styles.modalTitle}>ZONE {selectedZone?.name.replace(/Zone\s*/i, '')}</Text>
             
-            {selectedZone && (
-              <>
-                <Text style={[styles.modalStatus, { color: selectedZone.name.includes('A') ? '#ef4444' : '#10b981' }]}>
-                  {selectedZone.status}
-                </Text>
-                <Text style={styles.modalDescription}>
-                  {selectedZone.capacity - selectedZone.current_occupancy} spaces available
-                </Text>
-              </>
-            )}
+            {selectedZone && (() => {
+              const statusInfo = getZoneStatusTextAndColor(selectedZone);
+              return (
+                <>
+                  <Text style={[styles.modalStatus, { color: statusInfo.color }]}>
+                    {statusInfo.text}
+                  </Text>
+                  <Text style={styles.modalDescription}>
+                    {selectedZone.capacity - selectedZone.current_occupancy} spaces available
+                  </Text>
+                </>
+              );
+            })()}
 
             <View style={styles.floorPlanBg}>
               {selectedZone ? (
