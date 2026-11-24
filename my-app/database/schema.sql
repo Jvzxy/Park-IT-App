@@ -708,9 +708,16 @@ WITH CHECK (
 );
 DROP POLICY IF EXISTS reports_update_staff ON public.parking_reports;
 DROP POLICY IF EXISTS reports_delete_admin ON public.parking_reports;
-CREATE POLICY reports_delete_admin ON public.parking_reports
+DROP POLICY IF EXISTS reports_delete_staff ON public.parking_reports;
+CREATE POLICY reports_delete_staff ON public.parking_reports
 FOR DELETE TO authenticated
-USING (public.current_app_role() = 'admin');
+USING (
+  public.current_app_role() = 'admin'
+  OR (
+    public.current_app_role() = 'guard'
+    AND public.is_zone_guard(zone_id)
+  )
+);
 
 DROP POLICY IF EXISTS report_updates_read ON public.report_updates;
 CREATE POLICY report_updates_read ON public.report_updates
@@ -804,7 +811,7 @@ GRANT SELECT, INSERT, DELETE ON public.parking_reports TO authenticated;
 GRANT SELECT, INSERT ON public.report_updates TO authenticated;
 GRANT SELECT ON public.notifications TO authenticated;
 GRANT UPDATE (is_read) ON public.notifications TO authenticated;
-GRANT SELECT, INSERT, UPDATE ON public.announcements TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.announcements TO authenticated;
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.guard_assignments TO authenticated;
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.student_vehicles TO authenticated;
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.system_settings TO authenticated;
