@@ -1,13 +1,21 @@
 {
   "expo": {
-    "name": "my-app",
-    "slug": "my-app",
+    "name": "Park-IT",
+    "slug": "park-it",
+    "icon": "./src/assets/logo/Park-IT App Logo.png",
     "scheme": "parkit",
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": true
+    },
+    "android": {
+      "package": "com.parkit.mobile",
+      "icon": "./src/assets/logo/Park-IT App Logo.png",
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "plugins": [
       "expo-status-bar",
@@ -18,6 +26,12 @@
           "photosPermission": "Allow Park-IT to attach a photo to a parking report."
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "2d9abcc6-4fc7-4354-ad66-050f41f2ea79"
+      }
+    },
+    "owner": "jussydurain"
   }
 }
